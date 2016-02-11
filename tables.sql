@@ -5,7 +5,8 @@ drop table if exists Department, Programme, DepartmentProgramme, Branch, Course,
  BranchRecommended, Student, StudentBranchRelation,StudentCourseCompleted,
 StudentCourseRegistered, CourseWaitList;
 
---add not null and drop table if exists
+--not sure about naming conventions. Also some table names and attribute names 
+-- aren't very good
 
 create table Department (
 	abbreviation text primary key check (abbreviation != ''),
@@ -82,8 +83,8 @@ create table BranchRecommended (
 );
 
 create table Student (
-	personNumber text primary key check (personNumber ~ '^\d{12}$'), --ÅÅÅÅMMDDXXXX
-	name text not null check (name != ''),  --surname and lastname maybe
+	personNumber text primary key check (personNumber ~ '^\d{12}$'), --YYYYMMDDXXXX
+	name text not null check (name != ''),  --first name and surname maybe
 	username text unique not null check (username != ''),
 	programmeName text references Programme(name),
 	unique (personNumber, programmeName)
@@ -101,7 +102,7 @@ create table StudentBranchRelation (
 create table StudentCourseCompleted (
 	studentPersonNumber text references Student(personNumber),
 	courseCode text references Course(courseCode),
-	grade text not null check (grade ~ '^(U|3|4|5)$'),  --grade U,3,4,5
+	grade text not null check (grade ~ '^(U|3|4|5)$'),  --grades U,3,4,5
 	primary key(studentPersonNumber, courseCode)
 );
 
