@@ -51,7 +51,7 @@ CREATE VIEW UnreadMandatory AS
     s.name AS studentName,
     scc.coursecode
   FROM student s
-    LEFT JOIN studentbranchrelation sbr ON sbr.personnumber = s.personnumber
-    LEFT JOIN branchmandatory bm ON bm.branchname = sbr.branchname AND bm.programmename = sbr.programmename
-    LEFT JOIN studentcoursecompleted scc ON scc.studentpersonnumber = s.personnumber AND scc.coursecode = bm.coursecode
-  WHERE (scc.grade IS NULL OR scc.grade = 'U') AND bm.coursecode IS NOT NULL;
+    INNER JOIN studentbranchrelation sbr ON sbr.personnumber = s.personnumber
+    INNER JOIN branchmandatory bm ON bm.branchname = sbr.branchname AND bm.programmename = sbr.programmename
+    INNER JOIN studentcoursecompleted scc ON scc.studentpersonnumber = s.personnumber AND scc.coursecode = bm.coursecode
+  WHERE (scc.grade IS NULL OR scc.grade = 'U');
