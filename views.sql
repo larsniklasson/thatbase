@@ -9,6 +9,7 @@ CREATE VIEW StudentsFollowing AS
 
 CREATE VIEW FinishedCourses AS
   SELECT
+    s.personnumber,
     s.name AS studentName,
     c.name AS courseName,
     c.credit,
@@ -20,11 +21,13 @@ CREATE VIEW FinishedCourses AS
 CREATE VIEW Registrations AS
   SELECT
     scr.studentpersonnumber,
+    scr.coursecode,
     'registered' AS status
   FROM StudentCourseRegistered scr
-  UNION ALL
+  UNION
   SELECT
     cwl.studentpersonnumber,
+    cwl.coursecode,
     'waiting' AS status
   FROM CourseWaitList cwl;
 
