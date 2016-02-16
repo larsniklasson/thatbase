@@ -9,6 +9,8 @@ SELECT
    AND scc.grade != 'U'
    GROUP BY s.personnumber) AS creditSum,
 
+   -- Must have a branch
+
   -- Total number of math credits
   (SELECT SUM(c.credit) as foo
    FROM studentcoursecompleted scc
