@@ -36,7 +36,7 @@ create table Course (
 	courseCode text primary key check (courseCode != ''),
 	departmentAbbr text references Department(abbreviation) not null,
 	name text not null check (name != ''),
-	credit int not null check (credit >= 0)
+	credit double precision not null check (credit >= 0)
 );
 
 create table LimitedCourse (
