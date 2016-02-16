@@ -3,10 +3,9 @@ DROP VIEW IF EXISTS StudentsFollowing, FinishedCourses, Registrations, PassedCou
 CREATE VIEW StudentsFollowing AS
   SELECT
     s.*,
-    b.name AS branchName
+    sbr.branchname
   FROM Student s
     LEFT JOIN StudentBranchRelation sbr ON sbr.personnumber = s.personnumber
-    LEFT JOIN Branch b ON b.name = sbr.branchname AND b.programmename = sbr.programmename;
 
 CREATE VIEW FinishedCourses AS
   SELECT
