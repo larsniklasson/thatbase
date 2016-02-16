@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS StudentsFollowing, FinishedCourses, Registrations, PassedCourses, UnreadMandatory;
+DROP VIEW IF EXISTS StudentsFollowing, FinishedCourses, Registrations, PassedCourses, UnreadMandatory, PathToGraduation;
 
 CREATE VIEW StudentsFollowing AS
   SELECT
