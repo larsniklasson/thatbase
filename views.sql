@@ -5,8 +5,8 @@ CREATE VIEW StudentsFollowing AS
     s.*,
     b.name AS branchName
   FROM Student s
-    LEFT OUTER JOIN StudentBranchRelation sbr ON sbr.personnumber = s.personnumber
-    LEFT OUTER JOIN Branch b ON b.name = sbr.branchname AND b.programmename = sbr.programmename;
+    LEFT JOIN StudentBranchRelation sbr ON sbr.personnumber = s.personnumber
+    LEFT JOIN Branch b ON b.name = sbr.branchname AND b.programmename = sbr.programmename;
 
 CREATE VIEW FinishedCourses AS
   SELECT
