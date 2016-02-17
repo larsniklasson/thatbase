@@ -3,7 +3,7 @@ drop table if exists Department, Programme, DepartmentProgramme, Branch, Course,
  CoursePrerequisites , ProgrammeMandatory, 
  BranchMandatory, 
  BranchRecommended, Student, StudentBranchRelation,StudentCourseCompleted,
-StudentCourseRegistered, CourseWaitList;
+StudentCourseRegistered, CourseWaitList CASCADE;
 
 --not sure about naming conventions. Also some table names and attribute names 
 -- aren't very good
@@ -115,7 +115,7 @@ create table StudentCourseRegistered (
 create table CourseWaitList (
 	courseCode text references LimitedCourse(courseCode),
 	studentPersonNumber text references Student(personNumber),
-	position int not null check (position > 0),
+	position serial not null check (position > 0),
 	primary key (courseCode, studentPersonNumber),
 	unique(courseCode, position)
 );

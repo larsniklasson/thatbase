@@ -1,4 +1,5 @@
-DROP VIEW IF EXISTS StudentsFollowing, FinishedCourses, Registrations, PassedCourses, UnreadMandatory, PathToGraduation;
+DROP VIEW IF EXISTS StudentsFollowing, FinishedCourses, Registrations, PassedCourses, UnreadMandatory, PathToGraduation,
+CourseQueuePositions;
 
 CREATE VIEW StudentsFollowing AS
   SELECT
@@ -148,4 +149,10 @@ CREATE VIEW PathToGraduation AS
               ) src ON src.personnumber = s.personnumber
 
     LEFT JOIN studentbranchrelation sbr ON sbr.personnumber = s.personnumber;
+
+
+CREATE VIEW CourseQueuePositions AS
+  SELECT *
+  FROM coursewaitlist cwl
+  ORDER BY coursecode, position;
 

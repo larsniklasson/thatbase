@@ -30,8 +30,8 @@ INSERT INTO LimitedCourse (coursecode, maxnbrstudents) VALUES
   ('FFR135', 100);
 
 INSERT INTO CoursePrerequisites (coursecode, courseprerequisitecode) VALUES
-  ('DAT060', 'DAT060'),
-  ('TMA265', 'TMV200');
+  ('DAT060', 'TMA265'),
+  ('DAT060', 'EDA433');
 
 INSERT INTO Classification (classification) VALUES
   ('Math'),
@@ -84,6 +84,7 @@ INSERT INTO StudentBranchRelation (personnumber, branchname, programmename) VALU
 INSERT INTO StudentCourseCompleted (studentpersonnumber, coursecode, grade) VALUES
   ('199405269088', 'EDA433', '5'),
   ('199405269088', 'TMV200', 'U'),
+  ('199405269088', 'TMA265', '3'),
 
   ('199305269088', 'EDA433', '5'),
   ('199305269088', 'TDA545', '5'),
@@ -92,24 +93,23 @@ INSERT INTO StudentCourseCompleted (studentpersonnumber, coursecode, grade) VALU
   ('199305269088', 'EDA122', '3'),
   ('199305269088', 'FFR135', '5'),
   ('199305269088', 'MVE922', '5'),
+  ('199305269088', 'TMA265', '5'),
 
   ('199001269088', 'EDA433', '5'),
   ('199001269088', 'TDA545', '5'),
   ('199001269088', 'TMV200', '5'),
-  ('199001269088', 'DAT060', '5'),
   ('199001269088', 'EDA122', 'U'),
 
   ('197809218581', 'EDA433', '5'),
   ('197809218581', 'TDA545', '5'),
-  ('197809218581', 'DAT060', '5'),
   ('197809218581', 'EDA122', '3');
 
 INSERT INTO StudentCourseRegistered (studentpersonnumber, coursecode) VALUES
   ('199405269088', 'DAT060'),
-  ('199405269088', 'TMA265');
+  ('195809218581', 'TMA265');
 
 INSERT INTO CourseWaitList (coursecode, studentpersonnumber, position) VALUES
   ('TMA265', '199405269088', 1),
   ('TMA265', '199001269088', 2),
-  ('FFR135', '197809218581', 1);
-
+  ('FFR135', '197809218581', 1),
+  ('FFR135', '199405269088', 2);
