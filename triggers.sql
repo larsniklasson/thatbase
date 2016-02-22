@@ -1,7 +1,52 @@
 DROP TRIGGER IF EXISTS on_registered ON registrations;
 DROP TRIGGER IF EXISTS on_unregistered ON registrations;
+DROP TRIGGER IF EXISTS on_waitListDelete ON coursewaitList;
+DROP TRIGGER IF EXISTS on_waitListInsert ON coursewaitList;
 DROP FUNCTION IF EXISTS on_registered() CASCADE;
 DROP FUNCTION IF EXISTS on_unregistered() CASCADE;
+DROP FUNCTION IF EXISTS on_waitListDelete() CASCADE;
+DROP FUNCTION IF EXISTS on_waitListInsert() CASCADE;
+
+
+
+CREATE FUNCTION on_waitListDelete()
+  RETURNS TRIGGER AS $on_waitListDelete$
+DECLARE
+  newPosition INT;
+  rec TEXT;
+BEGIN
+  newPosition := 1;
+  FOR rec IN (SELECT cwl.studentpersonnumber
+              FROM coursewaitlist cwl
+              WHERE cwl.coursecode = old.coursecode
+              ORDER BY position) LOOP
+
+    UPDATE coursewaitlist
+    SET position  = newPosition
+    WHERE studentpersonnumber = rec and coursecode = old.coursecode;
+
+    newPosition := newPosition + 1;
+  END LOOP;
+  RETURN OLD;
+END;
+$on_waitListDelete$ LANGUAGE plpgsql;
+
+
+CREATE FUNCTION on_waitListInsert()
+  RETURNS TRIGGER AS $on_waitListInsert$
+BEGIN
+  UPDATE coursewaitlist
+  SET position = (SELECT coalesce(max(position) + 1, 1)
+                  FROM coursewaitlist
+                  WHERE coursecode = new.coursecode)
+  WHERE new.studentpersonnumber = studentpersonnumber AND coursecode = new.coursecode;
+  RETURN new;
+
+END;
+$on_waitListInsert$ LANGUAGE plpgsql;
+
+
+
 
 CREATE FUNCTION on_registered()
   RETURNS TRIGGER AS $on_registered$
@@ -59,7 +104,8 @@ BEGIN
 
   END IF;
 
-  INSERT INTO studentcourseregistered (studentpersonnumber, coursecode) VALUES (NEW.studentpersonnumber, new.coursecode);
+  INSERT INTO studentcourseregistered (studentpersonnumber, coursecode)
+  VALUES (NEW.studentpersonnumber, new.coursecode);
   RETURN NULL;
 END;
 $on_registered$ LANGUAGE plpgsql;
@@ -70,42 +116,46 @@ DECLARE
   queuePersonNumber TEXT;
 BEGIN
 
+  DELETE FROM studentcourseregistered scr
+  WHERE
+    scr.studentpersonnumber = old.studentpersonnumber AND scr.coursecode = old.coursecode;
+
   -- Is it a limited course?
   IF ((SELECT COUNT(coursecode)
        FROM limitedcourse lc
-       WHERE lc.coursecode = new.coursecode) = 1)
+       WHERE lc.coursecode = old.coursecode) = 1)
   THEN
 
     -- there is a student in the wait list AND there is an open spot in the course after the student has been unregistered
     IF ((SELECT COUNT(cwl.coursecode)
          FROM coursewaitlist cwl
-         WHERE cwl.coursecode = new.coursecode) > 0 AND (SELECT lc.maxnbrstudents - COUNT(scc.coursecode) AS spotsLeft
+         WHERE cwl.coursecode = old.coursecode) > 0 AND (SELECT lc.maxnbrstudents - COUNT(scc.coursecode) AS spotsLeft
                                                          FROM course c
                                                            INNER JOIN limitedcourse lc ON lc.coursecode = c.coursecode
                                                            LEFT JOIN studentcourseregistered scc
                                                              ON c.coursecode = scc.coursecode
-                                                         WHERE c.coursecode = new.coursecode
+                                                         WHERE c.coursecode = old.coursecode
                                                          GROUP BY lc.maxnbrstudents) > 0)
     THEN
 
       -- Find next person in wait list
       queuePersonNumber := (SELECT cwl.studentpersonnumber
                             FROM coursewaitlist cwl
-                            WHERE cwl.coursecode = new.coursecode
+                            WHERE cwl.coursecode = old.coursecode
                             ORDER BY cwl.position ASC
                             LIMIT 1);
 
       -- Remove person from wait list and register them on the course
       DELETE FROM coursewaitlist cwl
-      WHERE cwl.studentpersonnumber = queuePersonNumber AND cwl.coursecode = NEW.coursecode;
-      INSERT INTO studentcourseregistered (studentpersonnumber, coursecode) VALUES (queuePersonNumber, NEW.coursecode);
-
+      WHERE cwl.studentpersonnumber = queuePersonNumber AND cwl.coursecode = old.coursecode;
+      INSERT INTO studentcourseregistered (studentpersonnumber, coursecode) VALUES (queuePersonNumber, old.coursecode);
+      RAISE NOTICE 'Registered first person in the waitlist.';
     END IF;
 
   END IF;
 
 
-  RETURN new;
+  RETURN NULL;
 END;
 $on_unregistered$ LANGUAGE plpgsql;
 
@@ -114,3 +164,10 @@ FOR EACH ROW EXECUTE PROCEDURE on_registered();
 
 CREATE TRIGGER on_unregistered INSTEAD OF DELETE ON registrations
 FOR EACH ROW EXECUTE PROCEDURE on_unregistered();
+
+CREATE TRIGGER on_waitListInsert AFTER INSERT ON coursewaitList
+FOR EACH ROW EXECUTE PROCEDURE on_waitListInsert();
+
+
+CREATE TRIGGER on_waitListDelete AFTER DELETE ON coursewaitlist
+FOR EACH ROW EXECUTE PROCEDURE on_waitListDelete();

@@ -115,7 +115,7 @@ create table StudentCourseRegistered (
 create table CourseWaitList (
 	courseCode text references LimitedCourse(courseCode),
 	studentPersonNumber text references Student(personNumber),
-	position serial not null check (position > 0),
+	position int check (position > 0), --serial
 	primary key (courseCode, studentPersonNumber),
 	unique(courseCode, position)
 );

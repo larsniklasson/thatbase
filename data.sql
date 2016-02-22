@@ -24,12 +24,14 @@ INSERT INTO Course (coursecode, departmentabbr, name, credit) VALUES
   ('FFR135', 'CSE', 'Artificiella neurala nätverk', 7.5),
   ('TMA265', 'MVE', 'Numerisk linjär algebra', 7.5),
   ('MVE922', 'CSE', 'Komplexa uträkningar med datasystem', 7.5),
-  ('DAT137', 'CSE', 'En begränsad kurs om datorsystem', 7.5);
+  ('DAT137', 'CSE', 'En begränsad kurs om datorsystem', 7.5),
+  ('HP95', 'CSE', 'Harry Potter och hans världar', 7.5);
 
 INSERT INTO LimitedCourse (coursecode, maxnbrstudents) VALUES
   ('TMA265', 50),
   ('FFR135', 100),
-  ('DAT137', 1);
+  ('DAT137', 1),
+  ('HP95', 1);
 
 INSERT INTO CoursePrerequisites (coursecode, courseprerequisitecode) VALUES
   ('DAT060', 'TMA265'),
@@ -110,8 +112,8 @@ INSERT INTO StudentCourseRegistered (studentpersonnumber, coursecode) VALUES
   ('199405269088', 'DAT060'),
   ('195809218581', 'TMA265');
 
-INSERT INTO CourseWaitList (coursecode, studentpersonnumber, position) VALUES
-  ('TMA265', '199405269088', 1),
-  ('TMA265', '199001269088', 2),
-  ('FFR135', '197809218581', 1),
-  ('FFR135', '199405269088', 2);
+INSERT INTO CourseWaitList (coursecode, studentpersonnumber) VALUES
+  ('TMA265', '199405269088'),
+  ('TMA265', '199001269088'),
+  ('FFR135', '197809218581'),
+  ('FFR135', '199405269088');
