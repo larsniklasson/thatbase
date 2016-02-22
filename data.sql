@@ -23,11 +23,13 @@ INSERT INTO Course (coursecode, departmentabbr, name, credit) VALUES
   ('EDA122', 'CSE', 'Feltoleranta datorsystem', 7.5),
   ('FFR135', 'CSE', 'Artificiella neurala nätverk', 7.5),
   ('TMA265', 'MVE', 'Numerisk linjär algebra', 7.5),
-  ('MVE922', 'MVE', 'Komplexa uträkningar med datasystem', 7.5);
+  ('MVE922', 'CSE', 'Komplexa uträkningar med datasystem', 7.5),
+  ('DAT137', 'CSE', 'En begränsad kurs om datorsystem', 7.5);
 
 INSERT INTO LimitedCourse (coursecode, maxnbrstudents) VALUES
   ('TMA265', 50),
-  ('FFR135', 100);
+  ('FFR135', 100),
+  ('DAT137', 1);
 
 INSERT INTO CoursePrerequisites (coursecode, courseprerequisitecode) VALUES
   ('DAT060', 'TMA265'),

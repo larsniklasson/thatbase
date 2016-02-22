@@ -59,7 +59,8 @@ BEGIN
 
   END IF;
 
-  RETURN new;
+  INSERT INTO studentcourseregistered (studentpersonnumber, coursecode) VALUES (NEW.studentpersonnumber, new.coursecode);
+  RETURN NULL;
 END;
 $on_registered$ LANGUAGE plpgsql;
 
