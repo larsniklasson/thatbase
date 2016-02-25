@@ -61,6 +61,7 @@ CREATE VIEW UnreadMandatory AS
 CREATE VIEW PathToGraduation AS
   SELECT
     s.name,
+    s.personnumber,
     coalesce(creditCount, 0)              AS creditCount,
     -- 0 if null
     unreadMandatoryCount,
