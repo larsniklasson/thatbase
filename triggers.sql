@@ -87,6 +87,15 @@ BEGIN
       RAISE EXCEPTION 'Student already in wait list';
     END IF;
 
+    -- Is the student already registered?
+    IF ((SELECT COUNT(coursecode)
+         FROM studentcourseregistered
+         WHERE coursecode = new.coursecode
+               AND studentpersonnumber = new.studentpersonnumber) != 0)
+    THEN
+      RAISE EXCEPTION 'Student already registered';
+    END IF;
+
     -- Is the course already full
     IF ((SELECT lc.maxnbrstudents - COUNT(scc.coursecode) AS spotsLeft
          FROM course c
@@ -97,7 +106,7 @@ BEGIN
     THEN
       -- Add to wait list
       INSERT INTO coursewaitlist (coursecode, studentpersonnumber) VALUES (new.coursecode, new.studentpersonnumber);
-      RAISE NOTICE 'Course was full. Student placed in wait list.';
+      RAISE EXCEPTION 'Course was full. Student placed in wait list.';
       -- Don't insert the student, they are now put in waiting list instead
       RETURN NULL;
     END IF;
