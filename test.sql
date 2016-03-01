@@ -1,7 +1,17 @@
-SELECT *
-FROM coursequeuepositions
-WHERE coursecode = 'FFR135';
-
-delete from coursewaitlist where coursecode = 'FFR135' and studentpersonnumber= '197809218581';
-delete from coursewaitlist where coursecode = 'FFR135' and studentpersonnumber= '199405269088';
-
+SELECT
+  s.personnumber,
+  pm.coursecode
+FROM student s
+  INNER JOIN programmemandatory pm ON s.programmename = pm.programmename
+UNION
+SELECT
+  s.personnumber,
+  bm.coursecode
+FROM student s
+  JOIN studentbranchrelation sbr ON s.personnumber = sbr.personnumber AND s.programmename = sbr.programmename
+  INNER JOIN branchmandatory bm ON bm.programmename = sbr.programmename AND bm.branchname = sbr.branchname
+EXCEPT
+SELECT
+  personnumber,
+  coursecode
+FROM passedcourses;
