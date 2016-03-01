@@ -41,22 +41,21 @@ CREATE VIEW PassedCourses AS
 CREATE VIEW UnreadMandatory AS
   SELECT
     s.personnumber,
-    s.name AS studentName,
     pm.coursecode
   FROM student s
-    LEFT JOIN programmemandatory pm ON pm.programmename = s.programmename
-    LEFT JOIN studentcoursecompleted scc ON scc.studentpersonnumber = s.personnumber AND scc.coursecode = pm.coursecode
-  WHERE scc.grade IS NULL OR scc.grade = 'U'
-  UNION ALL
+    INNER JOIN programmemandatory pm ON s.programmename = pm.programmename
+  UNION
   SELECT
     s.personnumber,
-    s.name AS studentName,
-    scc.coursecode
+    bm.coursecode
   FROM student s
-    INNER JOIN studentbranchrelation sbr ON sbr.personnumber = s.personnumber
-    INNER JOIN branchmandatory bm ON bm.branchname = sbr.branchname AND bm.programmename = sbr.programmename
-    INNER JOIN studentcoursecompleted scc ON scc.studentpersonnumber = s.personnumber AND scc.coursecode = bm.coursecode
-  WHERE (scc.grade IS NULL OR scc.grade = 'U');
+    JOIN studentbranchrelation sbr ON s.personnumber = sbr.personnumber AND s.programmename = sbr.programmename
+    INNER JOIN branchmandatory bm ON bm.programmename = sbr.programmename AND bm.branchname = sbr.branchname
+  EXCEPT
+  SELECT
+    personnumber,
+    coursecode
+  FROM passedcourses;
 
 CREATE VIEW PathToGraduation AS
   SELECT
