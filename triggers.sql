@@ -1,51 +1,7 @@
 DROP TRIGGER IF EXISTS on_registered ON registrations;
 DROP TRIGGER IF EXISTS on_unregistered ON registrations;
-DROP TRIGGER IF EXISTS on_waitListDelete ON coursewaitList;
-DROP TRIGGER IF EXISTS on_waitListInsert ON coursewaitList;
 DROP FUNCTION IF EXISTS on_registered() CASCADE;
 DROP FUNCTION IF EXISTS on_unregistered() CASCADE;
-DROP FUNCTION IF EXISTS on_waitListDelete() CASCADE;
-DROP FUNCTION IF EXISTS on_waitListInsert() CASCADE;
-
-
-
-CREATE FUNCTION on_waitListDelete()
-  RETURNS TRIGGER AS $on_waitListDelete$
-DECLARE
-  newPosition INT;
-  rec TEXT;
-BEGIN
-  newPosition := 1;
-  FOR rec IN (SELECT cwl.studentpersonnumber
-              FROM coursewaitlist cwl
-              WHERE cwl.coursecode = old.coursecode
-              ORDER BY position) LOOP
-
-    UPDATE coursewaitlist
-    SET position  = newPosition
-    WHERE studentpersonnumber = rec and coursecode = old.coursecode;
-
-    newPosition := newPosition + 1;
-  END LOOP;
-  RETURN OLD;
-END;
-$on_waitListDelete$ LANGUAGE plpgsql;
-
-
-CREATE FUNCTION on_waitListInsert()
-  RETURNS TRIGGER AS $on_waitListInsert$
-BEGIN
-  UPDATE coursewaitlist
-  SET position = (SELECT coalesce(max(position) + 1, 1)
-                  FROM coursewaitlist
-                  WHERE coursecode = new.coursecode)
-  WHERE new.studentpersonnumber = studentpersonnumber AND coursecode = new.coursecode;
-  RETURN new;
-
-END;
-$on_waitListInsert$ LANGUAGE plpgsql;
-
-
 
 
 CREATE FUNCTION on_registered()
@@ -106,7 +62,16 @@ BEGIN
     THEN
       -- Add to wait list
       INSERT INTO coursewaitlist (coursecode, studentpersonnumber) VALUES (new.coursecode, new.studentpersonnumber);
-      RAISE EXCEPTION 'Course was full. Student placed in wait list.';
+      RAISE NOTICE 'Course was full. Student placed in wait list.';
+
+      --set position last
+
+      UPDATE coursewaitlist
+      SET position = (SELECT coalesce(max(position) + 1, 1)
+                      FROM coursewaitlist
+                      WHERE coursecode = new.coursecode)
+      WHERE new.studentpersonnumber = studentpersonnumber AND coursecode = new.coursecode;
+
       -- Don't insert the student, they are now put in waiting list instead
       RETURN NULL;
     END IF;
@@ -123,6 +88,9 @@ CREATE FUNCTION on_unregistered()
   RETURNS TRIGGER AS $on_unregistered$
 DECLARE
   queuePersonNumber TEXT;
+
+  newPosition       INT;
+  rec               TEXT;
 BEGIN
 
   DELETE FROM studentcourseregistered scr
@@ -159,6 +127,24 @@ BEGIN
       WHERE cwl.studentpersonnumber = queuePersonNumber AND cwl.coursecode = old.coursecode;
       INSERT INTO studentcourseregistered (studentpersonnumber, coursecode) VALUES (queuePersonNumber, old.coursecode);
       RAISE NOTICE 'Registered first person in the waitlist.';
+
+      --FIX queuepositions
+
+
+      newPosition := 1;
+      FOR rec IN (SELECT cwl.studentpersonnumber
+                  FROM coursewaitlist cwl
+                  WHERE cwl.coursecode = old.coursecode
+                  ORDER BY position) LOOP
+
+        UPDATE coursewaitlist
+        SET position = newPosition
+        WHERE studentpersonnumber = rec AND coursecode = old.coursecode;
+
+        newPosition := newPosition + 1;
+      END LOOP;
+
+
     END IF;
 
   END IF;
@@ -173,10 +159,3 @@ FOR EACH ROW EXECUTE PROCEDURE on_registered();
 
 CREATE TRIGGER on_unregistered INSTEAD OF DELETE ON registrations
 FOR EACH ROW EXECUTE PROCEDURE on_unregistered();
-
-CREATE TRIGGER on_waitListInsert AFTER INSERT ON coursewaitList
-FOR EACH ROW EXECUTE PROCEDURE on_waitListInsert();
-
-
-CREATE TRIGGER on_waitListDelete AFTER DELETE ON coursewaitlist
-FOR EACH ROW EXECUTE PROCEDURE on_waitListDelete();
