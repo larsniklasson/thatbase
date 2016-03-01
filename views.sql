@@ -6,7 +6,7 @@ CREATE VIEW StudentsFollowing AS
     s.*,
     sbr.branchname
   FROM Student s
-    LEFT JOIN StudentBranchRelation sbr ON sbr.personnumber = s.personnumber
+    NATURAL LEFT JOIN StudentBranchRelation sbr;
 
 CREATE VIEW FinishedCourses AS
   SELECT
@@ -35,8 +35,8 @@ CREATE VIEW Registrations AS
 
 CREATE VIEW PassedCourses AS
   SELECT *
-  FROM studentcoursecompleted scc
-  WHERE scc.grade != 'U';
+  FROM FinishedCourses fc
+  WHERE fc.grade != 'U';
 
 CREATE VIEW UnreadMandatory AS
   SELECT
@@ -72,9 +72,9 @@ CREATE VIEW PathToGraduation AS
     CASE WHEN sbr.branchname IS NOT NULL AND mathCoursesCreditSum >= 20 AND researchCoursesCreditSum >= 10 AND
               seminarCourseCount >= 1 AND recommendedCourseCreditSum >= 10
       THEN
-        '1'
+        'Yes'
     ELSE
-      '0'
+      'No'
     END                                   AS canGraduate
 
   FROM student s
