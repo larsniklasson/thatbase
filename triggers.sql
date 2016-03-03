@@ -25,56 +25,58 @@ BEGIN
        FROM studentcoursecompleted scc
        WHERE scc.studentpersonnumber = new.studentpersonnumber
              AND scc.coursecode = new.coursecode
-             AND scc.grade != 'U') != 0)
-  THEN RAISE EXCEPTION 'Student have already passed this course.';
+             ) != 0)
+  THEN RAISE EXCEPTION 'Student have already taken this course.';
   END IF;
+
+
+  -- Is the student already registered?
+  IF ((SELECT COUNT(coursecode)
+       FROM studentcourseregistered
+       WHERE coursecode = new.coursecode
+             AND studentpersonnumber = new.studentpersonnumber) > 0)
+  THEN
+    RAISE EXCEPTION 'Student already registered';
+    RETURN null;
+  END IF;
+
 
   -- Is it a limited course?
   IF ((SELECT COUNT(coursecode)
        FROM limitedcourse lc
        WHERE lc.coursecode = new.coursecode) = 1)
-  THEN
+  THEN  
 
-    -- Is the student already in the waitlist?
-    IF ((SELECT COUNT(cwl.studentpersonnumber)
-         FROM coursewaitlist cwl
-         WHERE cwl.coursecode = new.coursecode AND cwl.studentpersonnumber = new.studentpersonnumber) != 0)
-    THEN
-      RAISE EXCEPTION 'Student already in wait list';
-    END IF;
+                -- Is the student already in the waitlist?
+                IF ((SELECT COUNT(cwl.studentpersonnumber)
+                     FROM coursewaitlist cwl
+                     WHERE cwl.coursecode = new.coursecode AND cwl.studentpersonnumber = new.studentpersonnumber) != 0)
+                THEN
+                  RAISE EXCEPTION 'Student already in wait list';
+                END IF;
+                -- Is the course already full
+                IF ((SELECT lc.maxnbrstudents - COUNT(scc.coursecode) AS spotsLeft
+                     FROM course c
+                       INNER JOIN limitedcourse lc ON lc.coursecode = c.coursecode
+                       LEFT JOIN studentcourseregistered scc ON c.coursecode = scc.coursecode
+                     WHERE c.coursecode = new.coursecode
+                     GROUP BY lc.maxnbrstudents) <= 0)
+                THEN
+                  -- Add to wait list
+                  INSERT INTO coursewaitlist (coursecode, studentpersonnumber) VALUES (new.coursecode, new.studentpersonnumber);
+                  RAISE NOTICE 'Course was full. Student placed in wait list.';
 
-    -- Is the student already registered?
-    IF ((SELECT COUNT(coursecode)
-         FROM studentcourseregistered
-         WHERE coursecode = new.coursecode
-               AND studentpersonnumber = new.studentpersonnumber) != 0)
-    THEN
-      RAISE EXCEPTION 'Student already registered';
-    END IF;
+                  --set position last
 
-    -- Is the course already full
-    IF ((SELECT lc.maxnbrstudents - COUNT(scc.coursecode) AS spotsLeft
-         FROM course c
-           INNER JOIN limitedcourse lc ON lc.coursecode = c.coursecode
-           LEFT JOIN studentcourseregistered scc ON c.coursecode = scc.coursecode
-         WHERE c.coursecode = new.coursecode
-         GROUP BY lc.maxnbrstudents) <= 0)
-    THEN
-      -- Add to wait list
-      INSERT INTO coursewaitlist (coursecode, studentpersonnumber) VALUES (new.coursecode, new.studentpersonnumber);
-      RAISE NOTICE 'Course was full. Student placed in wait list.';
+                  UPDATE coursewaitlist
+                  SET position = (SELECT coalesce(max(position) + 1, 1)
+                                  FROM coursewaitlist
+                                  WHERE coursecode = new.coursecode)
+                  WHERE new.studentpersonnumber = studentpersonnumber AND coursecode = new.coursecode;
 
-      --set position last
-
-      UPDATE coursewaitlist
-      SET position = (SELECT coalesce(max(position) + 1, 1)
-                      FROM coursewaitlist
-                      WHERE coursecode = new.coursecode)
-      WHERE new.studentpersonnumber = studentpersonnumber AND coursecode = new.coursecode;
-
-      -- Don't insert the student, they are now put in waiting list instead
-      RETURN NULL;
-    END IF;
+                  -- Don't insert the student, they are now put in waiting list instead
+                  RETURN NULL;
+                END IF;
 
   END IF;
 
@@ -96,6 +98,9 @@ BEGIN
   DELETE FROM studentcourseregistered scr
   WHERE
     scr.studentpersonnumber = old.studentpersonnumber AND scr.coursecode = old.coursecode;
+  DELETE FROM coursewaitlist cwl
+  WHERE
+    cwl.studentpersonnumber = old.studentpersonnumber AND cwl.coursecode = old.coursecode;
 
   -- Is it a limited course?
   IF ((SELECT COUNT(coursecode)
@@ -143,7 +148,6 @@ BEGIN
 
         newPosition := newPosition + 1;
       END LOOP;
-
 
     END IF;
 

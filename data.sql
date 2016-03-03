@@ -55,7 +55,6 @@ INSERT INTO CourseClassification (coursecode, classification) VALUES
   ('DAT060', 'Seminar');
 
 
-
 INSERT INTO ProgrammeMandatory (programmename, coursecode) VALUES
   ('Informationsteknik', 'EDA433'),
   ('Informationsteknik', 'TDA545'),
@@ -110,10 +109,14 @@ INSERT INTO StudentCourseCompleted (studentpersonnumber, coursecode, grade) VALU
 
 INSERT INTO StudentCourseRegistered (studentpersonnumber, coursecode) VALUES
   ('199405269088', 'DAT060'),
-  ('195809218581', 'TMA265');
+  ('199405269088', 'HP95'),
+  ('195809218581', 'TMA265'),
+  ('195809218581', 'DAT137'),
+  ('199405269088', 'DAT137');
 
 INSERT INTO CourseWaitList (coursecode, studentpersonnumber, position) VALUES
-  ('TMA265', '199405269088', 1),
   ('TMA265', '199001269088', 2),
+  ('HP95', '197809218581', 1),
+  ('HP95', '195809218581', 2),
   ('FFR135', '197809218581', 1),
   ('FFR135', '199405269088', 2);
