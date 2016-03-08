@@ -85,3 +85,19 @@ INSERT into registrations (studentpersonnumber, coursecode) values ('19900126908
 
 -- 199001269088 should have position 2
 select * from coursequeuepositions where coursecode= 'HP95';
+
+--remove first person from waitlist.
+delete from registrations WHERE coursecode='HP95' and studentpersonnumber='197809218581';
+
+
+--199001269088 should now be bumped up to position 1
+select * from coursequeuepositions where coursecode= 'HP95';
+
+--delete the only one in waitlist
+delete from registrations WHERE coursecode='HP95' and studentpersonnumber='199001269088';
+
+--delete the one registered. should give no error
+delete from registrations WHERE coursecode='HP95' and studentpersonnumber='199405269088';
+
+--should be empty
+select * from registrations where coursecode='HP95';

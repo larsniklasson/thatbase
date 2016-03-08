@@ -120,125 +120,6 @@ create table CourseWaitList (
 	unique(courseCode, position)
 );
 
-TRUNCATE TABLE Department, Programme, DepartmentProgramme, Branch, Course,
-LimitedCourse, Classification, CourseClassification,
-CoursePrerequisites, ProgrammeMandatory,
-BranchMandatory,
-BranchRecommended, Student, StudentBranchRelation, StudentCourseCompleted,
-StudentCourseRegistered, CourseWaitList;
-
-INSERT INTO Department (abbreviation, name) VALUES
-  ('CSE', 'Computer Science and Engineering'),
-  ('MVE', 'Math');
-
-INSERT INTO Programme (name, abbreviation) VALUES
-  ('Informationsteknik', 'IT');
-
-INSERT INTO DepartmentProgramme (departmentabbr, programmename) VALUES
-  ('CSE', 'Informationsteknik');
-
-INSERT INTO Course (coursecode, departmentabbr, name, credit) VALUES
-  ('EDA433', 'CSE', 'Grundläggande datorteknik', 7.5),
-  ('TDA545', 'CSE', 'Objektorienterad programvaruutveckling', 7.5),
-  ('TMV200', 'MVE', 'Diskret matematik', 7.5),
-  ('DAT060', 'CSE', 'Matematisk logik för datavetenskap', 7.5),
-  ('EDA122', 'CSE', 'Feltoleranta datorsystem', 7.5),
-  ('FFR135', 'CSE', 'Artificiella neurala nätverk', 7.5),
-  ('TMA265', 'MVE', 'Numerisk linjär algebra', 7.5),
-  ('MVE922', 'CSE', 'Komplexa uträkningar med datasystem', 7.5),
-  ('DAT137', 'CSE', 'En begränsad kurs om datorsystem', 7.5),
-  ('HP95', 'CSE', 'Harry Potter och hans världar', 7.5);
-
-INSERT INTO LimitedCourse (coursecode, maxnbrstudents) VALUES
-  ('TMA265', 50),
-  ('FFR135', 100),
-  ('DAT137', 1),
-  ('HP95', 1);
-
-INSERT INTO CoursePrerequisites (coursecode, courseprerequisitecode) VALUES
-  ('DAT060', 'TMA265'),
-  ('DAT060', 'EDA433');
-
-INSERT INTO Classification (classification) VALUES
-  ('Math'),
-  ('Computer Science'),
-  ('Research'),
-  ('Seminar');
-
-INSERT INTO CourseClassification (coursecode, classification) VALUES
-  ('EDA433', 'Computer Science'),
-  ('TMV200', 'Math'),
-  ('TMV200', 'Research'),
-  ('TDA545', 'Computer Science'),
-  ('TDA545', 'Math'),
-  ('DAT060', 'Computer Science'),
-  ('DAT060', 'Math'),
-  ('DAT060', 'Research'),
-  ('DAT060', 'Seminar');
-
-
-
-INSERT INTO ProgrammeMandatory (programmename, coursecode) VALUES
-  ('Informationsteknik', 'EDA433'),
-  ('Informationsteknik', 'TDA545'),
-  ('Informationsteknik', 'TMV200');
-;
-
-INSERT INTO Branch (name, programmename) VALUES
-  ('Software Engineering', 'Informationsteknik'),
-  ('Computer Systems and Networks', 'Informationsteknik');
-
-INSERT INTO BranchMandatory (branchname, programmename, coursecode) VALUES
-  ('Software Engineering', 'Informationsteknik', 'DAT060'),
-  ('Computer Systems and Networks', 'Informationsteknik', 'EDA122');
-
-INSERT INTO BranchRecommended (branchname, programmename, coursecode) VALUES
-  ('Software Engineering', 'Informationsteknik', 'FFR135'),
-  ('Software Engineering', 'Informationsteknik', 'MVE922'),
-  ('Computer Systems and Networks', 'Informationsteknik', 'TMA265');
-
-INSERT INTO Student (personnumber, name, username, programmename) VALUES
-  ('199405269088', 'Daniel Sunnerberg', 'dansunn', 'Informationsteknik'),
-  ('199305269088', 'Lars Niklasson', 'larnikl', 'Informationsteknik'),
-  ('199001269088', 'Josef Abrahamsson', 'jorabr', 'Informationsteknik'),
-  ('197809218581', 'John Doe', 'johdoe', 'Informationsteknik'),
-  ('195809218581', 'Abraham Lat', 'arblat', 'Informationsteknik');
-
-INSERT INTO StudentBranchRelation (personnumber, branchname, programmename) VALUES
-  ('199305269088', 'Software Engineering', 'Informationsteknik');
-
-INSERT INTO StudentCourseCompleted (studentpersonnumber, coursecode, grade) VALUES
-  ('199405269088', 'EDA433', '5'),
-  ('199405269088', 'TMV200', 'U'),
-  ('199405269088', 'TMA265', '3'),
-
-  ('199305269088', 'EDA433', '5'),
-  ('199305269088', 'TDA545', '5'),
-  ('199305269088', 'TMV200', '5'),
-  ('199305269088', 'DAT060', '5'),
-  ('199305269088', 'EDA122', '3'),
-  ('199305269088', 'FFR135', '5'),
-  ('199305269088', 'MVE922', '5'),
-  ('199305269088', 'TMA265', '5'),
-
-  ('199001269088', 'EDA433', '5'),
-  ('199001269088', 'TDA545', '5'),
-  ('199001269088', 'TMV200', '5'),
-  ('199001269088', 'EDA122', 'U'),
-
-  ('197809218581', 'EDA433', '5'),
-  ('197809218581', 'TDA545', '5'),
-  ('197809218581', 'EDA122', '3');
-
-INSERT INTO StudentCourseRegistered (studentpersonnumber, coursecode) VALUES
-  ('199405269088', 'DAT060'),
-  ('195809218581', 'TMA265');
-
-INSERT INTO CourseWaitList (coursecode, studentpersonnumber) VALUES
-  --('TMA265', '199405269088'),
-  ('TMA265', '199001269088'),
-  ('FFR135', '197809218581'),
-  ('FFR135', '199405269088');
 
 DROP VIEW IF EXISTS StudentsFollowing, FinishedCourses, Registrations, PassedCourses, UnreadMandatory, PathToGraduation,
 CourseQueuePositions;
@@ -248,7 +129,7 @@ CREATE VIEW StudentsFollowing AS
     s.*,
     sbr.branchname
   FROM Student s
-    LEFT JOIN StudentBranchRelation sbr ON sbr.personnumber = s.personnumber
+    NATURAL LEFT JOIN StudentBranchRelation sbr;
 
 CREATE VIEW FinishedCourses AS
   SELECT
@@ -277,32 +158,32 @@ CREATE VIEW Registrations AS
 
 CREATE VIEW PassedCourses AS
   SELECT *
-  FROM studentcoursecompleted scc
-  WHERE scc.grade != 'U';
+  FROM FinishedCourses fc
+  WHERE fc.grade != 'U';
 
 CREATE VIEW UnreadMandatory AS
   SELECT
     s.personnumber,
-    s.name AS studentName,
     pm.coursecode
   FROM student s
-    LEFT JOIN programmemandatory pm ON pm.programmename = s.programmename
-    LEFT JOIN studentcoursecompleted scc ON scc.studentpersonnumber = s.personnumber AND scc.coursecode = pm.coursecode
-  WHERE scc.grade IS NULL OR scc.grade = 'U'
-  UNION ALL
+    INNER JOIN programmemandatory pm ON s.programmename = pm.programmename
+  UNION
   SELECT
     s.personnumber,
-    s.name AS studentName,
-    scc.coursecode
+    bm.coursecode
   FROM student s
-    INNER JOIN studentbranchrelation sbr ON sbr.personnumber = s.personnumber
-    INNER JOIN branchmandatory bm ON bm.branchname = sbr.branchname AND bm.programmename = sbr.programmename
-    INNER JOIN studentcoursecompleted scc ON scc.studentpersonnumber = s.personnumber AND scc.coursecode = bm.coursecode
-  WHERE (scc.grade IS NULL OR scc.grade = 'U');
+    JOIN studentbranchrelation sbr ON s.personnumber = sbr.personnumber AND s.programmename = sbr.programmename
+    INNER JOIN branchmandatory bm ON bm.programmename = sbr.programmename AND bm.branchname = sbr.branchname
+  EXCEPT
+  SELECT
+    personnumber,
+    coursecode
+  FROM passedcourses;
 
 CREATE VIEW PathToGraduation AS
   SELECT
     s.name,
+    s.personnumber,
     coalesce(creditCount, 0)              AS creditCount,
     -- 0 if null
     unreadMandatoryCount,
@@ -313,9 +194,9 @@ CREATE VIEW PathToGraduation AS
     CASE WHEN sbr.branchname IS NOT NULL AND mathCoursesCreditSum >= 20 AND researchCoursesCreditSum >= 10 AND
               seminarCourseCount >= 1 AND recommendedCourseCreditSum >= 10
       THEN
-        '1'
+        'Yes'
     ELSE
-      '0'
+      'No'
     END                                   AS canGraduate
 
   FROM student s
@@ -398,3 +279,120 @@ CREATE VIEW CourseQueuePositions AS
   FROM coursewaitlist cwl
   ORDER BY coursecode, position;
 
+TRUNCATE TABLE Department, Programme, DepartmentProgramme, Branch, Course,
+LimitedCourse, Classification, CourseClassification,
+CoursePrerequisites, ProgrammeMandatory,
+BranchMandatory,
+BranchRecommended, Student, StudentBranchRelation, StudentCourseCompleted,
+StudentCourseRegistered, CourseWaitList;
+
+INSERT INTO Department (abbreviation, name) VALUES
+  ('CSE', 'Computer Science and Engineering'),
+  ('MVE', 'Math');
+
+INSERT INTO Programme (name, abbreviation) VALUES
+  ('Informationsteknik', 'IT');
+
+INSERT INTO DepartmentProgramme (departmentabbr, programmename) VALUES
+  ('CSE', 'Informationsteknik');
+
+INSERT INTO Course (coursecode, departmentabbr, name, credit) VALUES
+  ('EDA433', 'CSE', 'Grundläggande datorteknik', 7.5),
+  ('TDA545', 'CSE', 'Objektorienterad programvaruutveckling', 7.5),
+  ('TMV200', 'MVE', 'Diskret matematik', 7.5),
+  ('DAT060', 'CSE', 'Matematisk logik för datavetenskap', 7.5),
+  ('EDA122', 'CSE', 'Feltoleranta datorsystem', 7.5),
+  ('FFR135', 'CSE', 'Artificiella neurala nätverk', 7.5),
+  ('TMA265', 'MVE', 'Numerisk linjär algebra', 7.5),
+  ('MVE922', 'CSE', 'Komplexa uträkningar med datasystem', 7.5),
+  ('DAT137', 'CSE', 'En begränsad kurs om datorsystem', 7.5),
+  ('HP95', 'CSE', 'Harry Potter och hans världar', 7.5);
+
+INSERT INTO LimitedCourse (coursecode, maxnbrstudents) VALUES
+  ('TMA265', 50),
+  ('FFR135', 100),
+  ('DAT137', 1),
+  ('HP95', 1);
+
+INSERT INTO CoursePrerequisites (coursecode, courseprerequisitecode) VALUES
+  ('DAT060', 'TMA265'),
+  ('DAT060', 'EDA433');
+
+INSERT INTO Classification (classification) VALUES
+  ('Math'),
+  ('Computer Science'),
+  ('Research'),
+  ('Seminar');
+
+INSERT INTO CourseClassification (coursecode, classification) VALUES
+  ('EDA433', 'Computer Science'),
+  ('TMV200', 'Math'),
+  ('TMV200', 'Research'),
+  ('TDA545', 'Computer Science'),
+  ('TDA545', 'Math'),
+  ('DAT060', 'Computer Science'),
+  ('DAT060', 'Math'),
+  ('DAT060', 'Research'),
+  ('DAT060', 'Seminar');
+
+
+INSERT INTO ProgrammeMandatory (programmename, coursecode) VALUES
+  ('Informationsteknik', 'EDA433'),
+  ('Informationsteknik', 'TDA545'),
+  ('Informationsteknik', 'TMV200');
+;
+
+INSERT INTO Branch (name, programmename) VALUES
+  ('Software Engineering', 'Informationsteknik'),
+  ('Computer Systems and Networks', 'Informationsteknik');
+
+INSERT INTO BranchMandatory (branchname, programmename, coursecode) VALUES
+  ('Software Engineering', 'Informationsteknik', 'DAT060'),
+  ('Computer Systems and Networks', 'Informationsteknik', 'EDA122');
+
+INSERT INTO BranchRecommended (branchname, programmename, coursecode) VALUES
+  ('Software Engineering', 'Informationsteknik', 'FFR135'),
+  ('Software Engineering', 'Informationsteknik', 'MVE922'),
+  ('Computer Systems and Networks', 'Informationsteknik', 'TMA265');
+
+INSERT INTO Student (personnumber, name, username, programmename) VALUES
+  ('199405269088', 'Daniel Sunnerberg', 'dansunn', 'Informationsteknik'),
+  ('199305269088', 'Lars Niklasson', 'larnikl', 'Informationsteknik'),
+  ('199001269088', 'Josef Abrahamsson', 'jorabr', 'Informationsteknik'),
+  ('197809218581', 'John Doe', 'johdoe', 'Informationsteknik'),
+  ('195809218581', 'Abraham Lat', 'arblat', 'Informationsteknik');
+
+INSERT INTO StudentBranchRelation (personnumber, branchname, programmename) VALUES
+  ('199305269088', 'Software Engineering', 'Informationsteknik');
+
+INSERT INTO StudentCourseCompleted (studentpersonnumber, coursecode, grade) VALUES
+  ('199405269088', 'EDA433', '5'),
+  ('199405269088', 'TMV200', 'U'),
+  ('199405269088', 'TMA265', '3'),
+
+  ('199305269088', 'EDA433', '5'),
+  ('199305269088', 'TDA545', '5'),
+  ('199305269088', 'TMV200', '5'),
+  ('199305269088', 'DAT060', '5'),
+  ('199305269088', 'EDA122', '3'),
+  ('199305269088', 'FFR135', '5'),
+  ('199305269088', 'MVE922', '5'),
+  ('199305269088', 'TMA265', '5'),
+
+  ('199001269088', 'EDA433', '5'),
+  ('199001269088', 'TDA545', '5'),
+  ('199001269088', 'TMV200', '5'),
+  ('199001269088', 'EDA122', 'U'),
+
+  ('197809218581', 'EDA433', '5'),
+  ('197809218581', 'TDA545', '5'),
+  ('197809218581', 'EDA122', '3');
+
+INSERT INTO StudentCourseRegistered (studentpersonnumber, coursecode) VALUES
+  ('199405269088', 'DAT060'),
+  ('195809218581', 'TMA265');
+
+INSERT INTO CourseWaitList (coursecode, studentpersonnumber, position) VALUES
+  ('TMA265', '199001269088', 1),
+  ('FFR135', '197809218581', 1),
+  ('FFR135', '199405269088', 2);

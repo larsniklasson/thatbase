@@ -109,14 +109,9 @@ INSERT INTO StudentCourseCompleted (studentpersonnumber, coursecode, grade) VALU
 
 INSERT INTO StudentCourseRegistered (studentpersonnumber, coursecode) VALUES
   ('199405269088', 'DAT060'),
-  ('199405269088', 'HP95'),
-  ('195809218581', 'TMA265'),
-  ('195809218581', 'DAT137'),
-  ('199405269088', 'DAT137');
+  ('195809218581', 'TMA265');
 
 INSERT INTO CourseWaitList (coursecode, studentpersonnumber, position) VALUES
-  ('TMA265', '199001269088', 2),
-  ('HP95', '197809218581', 1),
-  ('HP95', '195809218581', 2),
+  ('TMA265', '199001269088', 1),
   ('FFR135', '197809218581', 1),
   ('FFR135', '199405269088', 2);
